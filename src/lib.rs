@@ -1,9 +1,14 @@
 use std::sync::{mpsc, Arc, Mutex};
 use std::thread;
 
+enum Message {
+    NewJob(Job),
+    Terminate,
+}
+
 pub struct ThreadPool {
     workers: Vec<Worker>,
-    sender: mpsc::Sender<Job>,
+    sender: mpsc::Sender<Message>,
 }
 
 trait FnBox {
@@ -20,6 +25,14 @@ type Job = Box<FnBox + Send + 'static>;
 
 impl Drop for ThreadPool {
     fn drop(&mut self) {
+        println!("Sending terminate message to all workers.");
+
+        for _ in &mut self.workers {
+            self.sender.send(Message::Terminate).unwrap();
+        }
+
+        println!("Shutting down all workers.");
+
         for worker in &mut self.workers {
             println!("Shutting down worker {}", worker.id);
 
@@ -57,7 +70,7 @@ impl ThreadPool {
     {
         let job = Box::new(f);
 
-        self.sender.send(job).unwrap();
+        self.sender.send(Message::NewJob(job)).unwrap();
     }
 }
 
@@ -67,15 +80,25 @@ pub struct Worker {
 }
 
 impl Worker {
-    fn new(id: usize, receiver: Arc<Mutex<mpsc::Receiver<Job>>>) -> Worker {
+    fn new(id: usize, receiver: Arc<Mutex<mpsc::Receiver<Message>>>) -> Worker {
         // need to safely share receiver among all workers => need Arc<Mutex<T>> to share ownership across multiple threads.:
         let thread = thread::spawn(move || {
             loop {
                 //lock - acquires mutex; unwrap - panics on errors; recv - receives Job and block
-                let job = receiver.lock().unwrap().recv().unwrap();
-                println!("Worker {} got a job; executing.", id);
+                let message = receiver.lock().unwrap().recv().unwrap();
 
-                job.call_box();
+                match message {
+                    Message::NewJob(job) => {
+                        println!("Worker {} got a job; executing.", id);
+
+                        job.call_box();
+                    }
+                    Message::Terminate => {
+                        println!("Worker {} was told to terminate!", id);
+
+                        break;
+                    }
+                }
             }
         });
 
