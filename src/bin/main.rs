@@ -1,7 +1,7 @@
+use std::fs::File;
 use std::io::prelude::*;
 use std::net::TcpListener;
 use std::net::TcpStream;
-use std::fs::File;
 
 extern crate hello;
 use hello::ThreadPool;
@@ -22,9 +22,9 @@ fn main() {
 fn handle_connection(mut stream: TcpStream) {
     let mut buffer = [0; 512];
     stream.read(&mut buffer).unwrap();
-    
+
     let get = b"GET / HTTP/1.1\r\n";
-    
+
     let (status, filename) = if buffer.starts_with(get) {
         ("HTTP/1.1 200 OK\r\n\r\n", "hello.html")
     } else {
@@ -32,7 +32,7 @@ fn handle_connection(mut stream: TcpStream) {
     };
 
     let mut file = File::open(filename).unwrap();
-    let mut contents = String::new(); 
+    let mut contents = String::new();
 
     file.read_to_string(&mut contents).unwrap();
 

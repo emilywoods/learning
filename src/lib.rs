@@ -1,5 +1,5 @@
-use std::thread;
 use std::sync::{mpsc, Arc, Mutex};
+use std::thread;
 
 pub struct ThreadPool {
     workers: Vec<Worker>,
@@ -36,15 +36,12 @@ impl ThreadPool {
             workers.push(Worker::new(id, Arc::clone(&receiver)));
         }
 
-        ThreadPool {
-            workers,
-            sender,
-        }
+        ThreadPool { workers, sender }
     }
 
     pub fn execute<F>(&self, f: F)
-        where
-            F:  FnOnce() + Send + 'static
+    where
+        F: FnOnce() + Send + 'static,
     {
         let job = Box::new(f);
 
@@ -59,9 +56,8 @@ pub struct Worker {
 
 impl Worker {
     fn new(id: usize, receiver: Arc<Mutex<mpsc::Receiver<Job>>>) -> Worker {
-
-        // need to safely share receiver among all workers => need Arc<Mutex<T>> to share ownership across multiple threads.: 
-        let thread = thread::spawn( move || {
+        // need to safely share receiver among all workers => need Arc<Mutex<T>> to share ownership across multiple threads.:
+        let thread = thread::spawn(move || {
             loop {
                 //lock - acquires mutex; unwrap - panics on errors; recv - receives Job and block
                 let job = receiver.lock().unwrap().recv().unwrap();
@@ -71,10 +67,6 @@ impl Worker {
             }
         });
 
-        Worker {
-            id,
-            thread,
-        }
+        Worker { id, thread }
     }
-
 }
