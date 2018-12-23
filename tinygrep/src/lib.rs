@@ -1,7 +1,5 @@
 use std::error::Error; 
-use std::fs::File;
-use std::io::prelude::*;
-
+use std::fs;
 
 pub struct Config {
     pub query: String,
@@ -20,13 +18,43 @@ impl Config {
     }
 }
 
-pub fn run(config: Config) -> Result<(), Box<Error>> {
-    let mut f = File::open(config.filename).expect("file not found");
+pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
+    let contents = fs::read_to_string(config.filename)?;
 
-    let mut contents = String::new();
-    f.read_to_string(&mut contents).expect("oh dear. something went wrong while reading the file");
-
-    println!("with text:\n{}", contents);
-
+    for line in search(&config.query, &contents) {
+        println!("{}", line);
+    }
     Ok(())
+}
+
+fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {   
+   let mut results = Vec::new();
+
+   for line in contents.lines() {
+       if line.contains(query) {
+          results.push(line); 
+       }
+   }
+
+   results
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn case_sensitive() {
+        let query = "duct";
+        let contents = "\
+Rust:
+safe, fast, productive.
+Pick three.
+Duct tape.";
+
+        assert_eq!(
+            vec!["safe, fast, productive."],
+            search(query, contents)
+        );
+    }
 }
