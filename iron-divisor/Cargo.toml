@@ -1,0 +1,11 @@
+[package]
+name = "iron-divisor"
+version = "0.1.0"
+authors = ["Emily Woods <hello@emilywoods.me>"]
+
+[dependencies]
+iron = "0.6.0"
+mime = "0.2.3"
+router = "0.6.0"
+urlencoded = "0.6.0"
+
