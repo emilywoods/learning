@@ -1,0 +1,6 @@
+[package]
+name = "tinygrep"
+version = "0.1.0"
+authors = ["Emily Woods <hello@emilywoods.me>"]
+
+[dependencies]
