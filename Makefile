@@ -10,11 +10,12 @@ run: install ## start app
 	.venv/bin/python app.py
 
 .PHONY: docker_build
-docker_build: docker build -t "my-favourite-tree" . ## build with tag "my-favourite-tree"
+docker_build:
+	docker build -t "my-favourite-tree" . ## build with tag "my-favourite-tree"
 
 .PHONY: docker_run
 docker_run: docker_build
-    docker build -t "my-favourite-tree" . ## build with tag "my-favourite-tree"
+	docker run -p 5000:5000 my-favourite-tree ## run image with tag "my-favourite-tree"
 
 .PHONY: help
 help:
