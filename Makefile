@@ -11,11 +11,15 @@ run: install ## start app
 
 .PHONY: docker_build
 docker_build:
-	docker build -t "my-favourite-tree" . ## build with tag "my-favourite-tree"
+	docker build -t "my-favourite-tree:latest" . ## build with tag "my-favourite-tree:latest"
 
 .PHONY: docker_run
 docker_run: docker_build
-	docker run -p 5000:5000 my-favourite-tree ## run image with tag "my-favourite-tree"
+	docker run -p 5000:5000 my-favourite-tree:latest ## run image with tag "my-favourite-tree:latest"
+
+.PHONY: build_and_deploy
+build_and_deploy: docker_build # build and deploy the application to minikube
+	kubectl apply -f manifest.yaml
 
 .PHONY: help
 help:
