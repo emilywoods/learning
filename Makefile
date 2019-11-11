@@ -29,7 +29,7 @@ help:
 
 .PHONY: clean
 clean: ## clean up afterwards
-	rm -rf .venv;
+	rm -rf .venv
 
 venv:
 	python3 -m venv .venv

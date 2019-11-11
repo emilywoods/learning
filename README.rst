@@ -73,6 +73,5 @@ To clean up all the resources installed locally, run::
 
   $ make clean
 
-
 .. _Docker: https://www.docker.com/
 .. _Minikube: https://github.com/kubernetes/minikube
